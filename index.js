@@ -1,4 +1,3 @@
-const { json } = require('express');
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -7,6 +6,7 @@ const { User } = require('./model/User');
 
 
 mongoose.connect(config.mongoURI, {useNewUrlParser:true})
+// mongoose.connect(config.mongoURI, {useUnifiedTopology: true})
     .then(() => {console.log('mongoDB Connected')})
     .catch((err) => {console.error(err)});
 
@@ -21,6 +21,7 @@ app.get('/api/test', (req, res) => {
 })
 
 app.post('/api/users/register', (req, res) => {
+    console.log('여기 들어옴');
     const user = new User(req.body); //bodyparser 가 없으면 req.body가 default로 undefined로 설정됨
 
     user.save((err, doc) => { 
