@@ -16,12 +16,8 @@ app.get('/', (req, res) => {
     res.json({'root' : 'root hi!'});
 })
 
-app.get('/api/test', (req, res) => {
-    res.send("test url 반갑습니다.");
-})
 
 app.post('/api/users/register', (req, res) => {
-    console.log('여기 들어옴');
     const user = new User(req.body); //bodyparser 가 없으면 req.body가 default로 undefined로 설정됨
 
     user.save((err, doc) => { 
@@ -32,6 +28,36 @@ app.post('/api/users/register', (req, res) => {
         console.log('success', 'register accepted');
         return res.status(200)
                   .json({sucess: true});
+    })
+})
+
+
+app.post('/api/users/login', (req, res) => {
+    console.log('login');
+
+    User.findOne({ email: req.body.email }, (err, user) => { //일치 email확인
+        if(!user) {
+            return res.json({
+                loginSuccess: false,
+                message: '해당 유저는 등록되어 있지 않습니다.'
+            })
+        }
+        
+
+        //비밀번호 확인
+        console.log('user', user);
+        console.log('got one');
+        user.comparePassword(req.body.password, (err, isMathc) => {
+            if(!isMathc) return res.json({ loginSuccess: false, message: 'wrong password'});
+        })
+        
+        console.log('암호 일치');
+        //비밀번호 일치한다면 토큰 생성
+        // user.generateToken((err, user) => {
+        //     if(err) return res.status(400).send(err);
+
+            
+        // })
     })
 })
 

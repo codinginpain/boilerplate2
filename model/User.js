@@ -52,5 +52,15 @@ userSchema.pre('save', function(next) { //코드 실행중 next만나면 밑에 
     }
 })
 
+//login시 암호 비교
+userSchema.methods.comparePassword = (plainPassword, cb) => {
+
+    bcrypt.compare(plainPassword, this.password, function(err, isMatch) {
+        if(err) return cb(err);
+
+        cb(null, isMatch); //err null
+    })
+}
+
 const User = mongoose.model('User', userSchema);
 module.exports = { User };
