@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 5;
+const jwt = require('jsonwebtoken');
 
 
 const userSchema = mongoose.Schema({
@@ -53,12 +54,27 @@ userSchema.pre('save', function(next) { //코드 실행중 next만나면 밑에 
 })
 
 //login시 암호 비교
-userSchema.methods.comparePassword = (plainPassword, cb) => {
+userSchema.methods.comparePassword = function(plainPassword, cb) {
 
     bcrypt.compare(plainPassword, this.password, function(err, isMatch) {
         if(err) return cb(err);
 
         cb(null, isMatch); //err null
+    })
+}
+
+//login시 토큰생성
+userSchema.methods.generateToken = function(cb) {
+    let user = this;
+    
+    //jsonwebtoken을 사용해 토큰 생헝
+    let token = jwt.sign(user._id.toHexString(), 'loginToken') // _id -> mongoDB에서 자동 생성해주는 아이디값
+    //token = user._id + 'loginToken'
+
+    user.toekn = token;
+    user.save((err, user) => {
+        if(err) return cb(err);
+        cb(null, user);
     })
 }
 
