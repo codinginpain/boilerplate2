@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require('mongoose');
 const config = require('./config/key');
 const { User } = require('./model/User');
+const { auth } = require("./middleware/auth");
 
 
 mongoose.connect(config.mongoURI, {useNewUrlParser:true})
@@ -43,16 +44,13 @@ app.post('/api/users/login', (req, res) => {
             })
         }
         
-
         //비밀번호 확인
-        console.log('index에서 user 확인', user);
         user.comparePassword(req.body.password, (err, isMathc) => {
             if(!isMathc) return res.json({ loginSuccess: false, message: 'wrong password'});
         })
         
-        console.log('암호 일치');
         //비밀번호 일치한다면 토큰 생성
-        user.generateToken((err, user) => {
+        user.generateToken(function(err, user)  {
             if(err) return res.status(400).send(err);
 
             res.cookie('x_auth', user.token)
@@ -62,5 +60,17 @@ app.post('/api/users/login', (req, res) => {
     })
 })
 
+app.get('/api/users/auth', auth, (req, res) => {
+    res.status(200).json({
+        _id: req.user._id,
+        isAdmin: req.user.role === 0 ? false : true,
+        isAuth: true,
+        email: req.user.email,
+        name: req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role,
+        image: req.user.image
+    })
+})
 console.log('server start');
 app.listen(5000);

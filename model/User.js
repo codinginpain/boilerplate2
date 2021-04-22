@@ -71,12 +71,27 @@ userSchema.methods.generateToken = function(cb) {
     let token = jwt.sign(user._id.toHexString(), 'loginToken') // _id -> mongoDB에서 자동 생성해주는 아이디값
     //token = user._id + 'loginToken'
 
-    user.toekn = token;
+    user.token = token;
     user.save((err, user) => {
         if(err) return cb(err);
         cb(null, user);
     })
 }
 
+userSchema.statics.findByToken = function(toekn, cb) {
+    let user = this;
+
+    jwt.verify(token, 'loginToken', function(err, decoded) {
+
+        //userId를 이용해서 user를 찾고 token과 값 비교
+        user.findOne({"id": decoded, "token": token}, function(err, user) {
+            if(err) return cb(err);
+            cb(null, user);
+        })
+    })
+}
+
+//schema 작성후 모델 자체를 만들기위해 mongoose.model 사용
+//param은 name of collection(User), scheam(User에 저장 될 userSchema)
 const User = mongoose.model('User', userSchema);
 module.exports = { User };
