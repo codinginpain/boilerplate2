@@ -78,10 +78,13 @@ userSchema.methods.generateToken = function(cb) {
     })
 }
 
-userSchema.statics.findByToken = function(toekn, cb) {
+userSchema.statics.findByToken = function(token, cb) {
     let user = this;
+    console.log("auth");
+    console.log(user);
 
     jwt.verify(token, 'loginToken', function(err, decoded) {
+        if(err) return cb(err);
 
         //userId를 이용해서 user를 찾고 token과 값 비교
         user.findOne({"id": decoded, "token": token}, function(err, user) {

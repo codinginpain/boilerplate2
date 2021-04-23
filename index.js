@@ -60,8 +60,9 @@ app.post('/api/users/login', (req, res) => {
     })
 })
 
-app.get('/api/users/auth', auth, (req, res) => {
-    res.status(200).json({
+//권한
+app.get('/api/users/auth', auth, (req, res) => { //middleware auth를 거쳐서
+    res.status(200).json({ //여기 콜백 했다는 말은 auth를 통과 완료했다는 뜻
         _id: req.user._id,
         isAdmin: req.user.role === 0 ? false : true,
         isAuth: true,
@@ -72,5 +73,14 @@ app.get('/api/users/auth', auth, (req, res) => {
         image: req.user.image
     })
 })
+
+//logout
+app.get('/api/users/logout', auth, (req, res) => {
+    User.findOneAndUpdate({ _id: req.userId}, {token: ""}, (err, user) => {
+        if(err) return res.json({success: false, err});
+        return res.status(200).send({success: true});
+    })
+})
+
 console.log('server start');
 app.listen(5000);
